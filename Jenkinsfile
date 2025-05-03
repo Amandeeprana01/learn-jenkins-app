@@ -3,7 +3,7 @@ pipeline {
 
     stages {
         stage('Build') {
-            agent{
+            agent {
                 docker {
                     image 'node:18-alpine'
                     reuseNode true
@@ -15,13 +15,13 @@ pipeline {
                 node --version
                 npm --version
                 npm ci
+                npm install serve  # ✅ Local install of serve
                 npm run build
                 ls -la
                 '''
             }
         }
-        stage('Test')
-        {
+        stage('Test') {
             agent {
                 docker {
                     image 'node:18-alpine'
@@ -35,8 +35,7 @@ pipeline {
                 '''
             }
         }
-        stage('E2E')
-        {
+        stage('E2E') {
             agent {
                 docker {
                     image 'mcr.microsoft.com/playwright:v1.52.0-noble'
@@ -45,8 +44,8 @@ pipeline {
             }
             steps {
                 sh '''
-                npm install -g serve
-                node_modules/.bin/serve -s build
+                npx serve -s build &  # ✅ Uses local serve from node_modules
+                sleep 3               # Wait for server to start
                 npx playwright test
                 '''
             }
