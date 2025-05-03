@@ -21,33 +21,39 @@ pipeline {
                 '''
             }
         }
-        stage('Test') {
-            agent {
-                docker {
-                    image 'node:18-alpine'
-                    reuseNode true
+
+        stage('Run Tests') {
+            parallel {
+                stage('Test') {
+                    agent {
+                        docker {
+                            image 'node:18-alpine'
+                            reuseNode true
+                        }
+                    }
+                    steps {
+                        sh '''
+                        test -f build/index.html
+                        npm test
+                        '''
+                    }
                 }
-            }
-            steps {
-                sh '''
-                test -f build/index.html
-                npm test
-                '''
-            }
-        }
-        stage('E2E') {
-            agent {
-                docker {
-                    image 'mcr.microsoft.com/playwright:v1.52.0-noble'
-                    reuseNode true
+
+                stage('E2E') {
+                    agent {
+                        docker {
+                            image 'mcr.microsoft.com/playwright:v1.52.0-noble'
+                            reuseNode true
+                        }
+                    }
+                    steps {
+                        sh '''
+                        npx serve -s build &      # ✅ Start server in background
+                        sleep 3                   # ✅ Wait for server to start
+                        npx playwright test       # ✅ Run Playwright tests
+                        '''
+                    }
                 }
-            }
-            steps {
-                sh '''
-                npx serve -s build &  # ✅ Uses local serve from node_modules
-                sleep 3               # Wait for server to start
-                npx playwright test
-                '''
             }
         }
     }
