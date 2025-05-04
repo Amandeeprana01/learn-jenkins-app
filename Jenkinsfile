@@ -1,12 +1,12 @@
 pipeline {
     agent any
 
-
     environment {
         NETLIFY_SITE_ID = '8686a009-5883-4cea-bb3d-243c44bcd1fa'
         NETLIFY_AUTH_TOKEN = credentials('netlify-tocken')
-
+        CI_ENVIRONMENT_URL= 'https://celebrated-genie-34fe47.netlify.app/'
     }
+
     stages {
         stage('Build') {
             agent {
@@ -54,29 +54,78 @@ pipeline {
                     }
                     steps {
                         sh '''
-                        npx serve -s build &      # ✅ Start server in background
-                        sleep 3                   # ✅ Wait for server to start
-                        npx playwright test       # ✅ Run Playwright tests
+                        npx serve -s build &
+                        sleep 3
+                        npx playwright test
                         '''
+                    }
+                    post {
+                        always {
+                            publishHTML([
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: false,
+                                keepAll: false,
+                                reportDir: 'playwright-report',
+                                reportFiles: 'index.html',
+                                reportName: 'Playwright Local',
+                                reportTitles: '',
+                                useWrapperFileDirectly: true
+                            ])
+                        }
                     }
                 }
             }
         }
+
         stage('Deploy') {
             agent {
                 docker {
                     image 'node:18-alpine'
                     reuseNode true
-                  }
+                }
             }
-             steps {
-                    sh '''
-                    npm install netlify-cli
-                    npx netlify --version
-                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-                    npx netlify status
-                    npx netlify deploy --dir=build --prod
-                    '''
+            steps {
+                sh '''
+                npm install netlify-cli
+                npx netlify --version
+                echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                npx netlify status
+                npx netlify deploy --dir=build --prod
+                '''
+            }
+        }
+
+        stage('Prod E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
+                    reuseNode true
+                }
+            }
+
+            environment {
+                CI_ENVIRONMENT_URL= 'https://celebrated-genie-34fe47.netlify.app'
+            }
+
+            steps {
+                sh '''
+                npx playwright test --reporter=html
+                '''
+            }
+
+            post {
+                always {
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: false,
+                        reportDir: 'playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright E2E',
+                        reportTitles: '',
+                        useWrapperFileDirectly: true
+                    ])
+                }
             }
         }
     }
