@@ -60,8 +60,7 @@ pipeline {
                         sh '''
                         npm install
                         npm run build
-                        npm install -g serve
-                        serve -s build -l 3000 &
+                        npx serve -s build -l 3000 &
                         npx wait-on http://localhost:3000    # Wait for it to be live
                         npx playwright test --reporter=html --output=playwright-report
                         '''
