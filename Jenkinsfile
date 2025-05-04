@@ -54,8 +54,9 @@ pipeline {
                     }
                     steps {
                         sh '''
-                        npx serve -s build &
-                        sleep 3
+                        npm run build
+                        npm run start &               # Serve the app in background
+                        npx wait-on http://localhost:3000    # Wait for it to be live
                         npx playwright test --reporter=html --output=playwright-report
                         '''
                     }
