@@ -92,7 +92,7 @@ pipeline {
                 npx netlify deploy --dir=build --json > deploy-output.json
                 '''
                 script{
-                env.STAGIBGURL = sh(script: "npx node-jq -r '.deploy_url' deploy-output.json", returnStdout: true)
+                env.STAGING_URL = sh(script: "npx node-jq -r '.deploy_url' deploy-output.json", returnStdout: true)
                 }
             }
             
@@ -144,24 +144,6 @@ pipeline {
         stage('Deploy prod') {
             agent {
                 docker {
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
-                npm install netlify-cli
-                npx netlify --version
-                echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-                npx netlify status
-                npx netlify deploy --dir=build --prod
-                '''
-            }
-        }
-
-        stage('Prod E2E') {
-            agent {
-                docker {
                     image 'mcr.microsoft.com/playwright:v1.52.0-jammy'
                     reuseNode true
                 }
@@ -173,6 +155,12 @@ pipeline {
 
             steps {
                 sh '''
+                node --version
+                npm install netlify-cli
+                npx netlify --version
+                echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                npx netlify status
+                npx netlify deploy --dir=build --prod
                 npx playwright test --reporter=html --output=playwright-report
                 '''
             }
