@@ -56,7 +56,7 @@ pipeline {
                         sh '''
                         npx serve -s build &
                         sleep 3
-                        npx playwright test
+                        npx playwright test --reporter=html --output=playwright-report
                         '''
                     }
                     post {
@@ -109,7 +109,7 @@ pipeline {
 
             steps {
                 sh '''
-                npx playwright test --reporter=html
+                npx playwright test --reporter=html --output=playwright-report
                 '''
             }
 
