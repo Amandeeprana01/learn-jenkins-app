@@ -4,6 +4,7 @@ pipeline {
 
     environment {
         NETLIFY_SITE_ID = '8686a009-5883-4cea-bb3d-243c44bcd1fa'
+        NETLIFY_AUTH_TOKEN = credentails('netlify-tocken')
     }
     stages {
         stage('Build') {
@@ -72,6 +73,7 @@ pipeline {
                     npm install netlify-cli
                     npx netlify --version
                     echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                    npx netlify status
                     '''
             }
         }
