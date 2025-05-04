@@ -5,6 +5,7 @@ pipeline {
         NETLIFY_SITE_ID = '8686a009-5883-4cea-bb3d-243c44bcd1fa'
         NETLIFY_AUTH_TOKEN = credentials('netlify-tocken')
         CI_ENVIRONMENT_URL= 'https://celebrated-genie-34fe47.netlify.app/'
+        REACT_APP_VERSION ='1.2.3'
     }
 
     stages {
@@ -117,16 +118,6 @@ pipeline {
                 }
             }
         }
-        stage('Confirm Deployment') {
-            steps {
-                script {
-                    timeout(time: 15, unit: 'MINUTES') {
-                        input message: 'Do you wish to deploy to production?', ok: 'Yes, sure I am!'
-                    }
-                }
-            }
-        }
-
 
         stage('Deploy prod') {
             agent {
