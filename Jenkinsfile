@@ -5,7 +5,7 @@ pipeline {
         NETLIFY_SITE_ID = '8686a009-5883-4cea-bb3d-243c44bcd1fa'
         NETLIFY_AUTH_TOKEN = credentials('netlify-tocken')
         CI_ENVIRONMENT_URL= 'https://celebrated-genie-34fe47.netlify.app/'
-        REACT_APP_VERSION ='1.2.3'
+        REACT_APP_VERSION ="1.2.3"
     }
 
     stages {
@@ -52,6 +52,9 @@ pipeline {
                             image 'mcr.microsoft.com/playwright:v1.52.0-jammy'
                             reuseNode true
                         }
+                    }
+                     environment {
+                          REACT_APP_VERSION = '1.2.3' // or pass it dynamically
                     }
                     steps {
                         sh '''
