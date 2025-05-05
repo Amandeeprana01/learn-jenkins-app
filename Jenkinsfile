@@ -14,7 +14,7 @@ pipeline {
                     image 'amazon/aws-cli'
                 }
             }
-            step{
+            steps {
                 sh '''
                 aws --version
                 '''
