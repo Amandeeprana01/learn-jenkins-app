@@ -52,9 +52,6 @@ pipeline {
                             reuseNode true
                         }
                     }
-                     environment {
-                          REACT_APP_VERSION = '1.2.3' // or pass it dynamically
-                    }
                     steps {
                         sh '''
                         npm install
