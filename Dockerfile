@@ -1,3 +1,7 @@
 FROM mcr.microsoft.com/playwright:v1.52.0-jammy
 
-RUN npm cache clean --force && npm install netlify-cli node-jq
+# Create and use a clean working directory
+WORKDIR /app
+
+# Ensure clean environment and install packages one by one
+RUN npm install netlify-cli && npm install node-jq
