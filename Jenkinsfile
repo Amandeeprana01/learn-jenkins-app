@@ -5,7 +5,6 @@ pipeline {
         NETLIFY_SITE_ID = '8686a009-5883-4cea-bb3d-243c44bcd1fa'
         NETLIFY_AUTH_TOKEN = credentials('netlify-tocken')
         CI_ENVIRONMENT_URL= 'https://celebrated-genie-34fe47.netlify.app/'
-        REACT_APP_VERSION ="1.2.3"
     }
 
     stages {
@@ -16,9 +15,6 @@ pipeline {
                     reuseNode true
                 }
             }
-            environment {
-                 REACT_APP_VERSION = '1.2.3'  // ✅ Moved here
-             }
             steps {
                 sh '''
                 ls -la
@@ -63,8 +59,8 @@ pipeline {
                         sh '''
                         npm install
                         npm run build
-                        npx serve -s build -l 3000 &
-                        npx wait-on http://localhost:3000    # Wait for it to be live
+                        npx serve -s build &
+                        sleep 10
                         npx playwright test --reporter=html --output=playwright-report
                         '''
                     }
