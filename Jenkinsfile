@@ -4,8 +4,10 @@ pipeline {
     environment {
         NETLIFY_SITE_ID = '8686a009-5883-4cea-bb3d-243c44bcd1fa'
         NETLIFY_AUTH_TOKEN = credentials('netlify-tocken')
-        CI_ENVIRONMENT_URL= 'https://celebrated-genie-34fe47.netlify.app/'
+        CI_ENVIRONMENT_URL = 'https://celebrated-genie-34fe47.netlify.app/'
     }
+
+    stages {
         stage('Build') {
             agent {
                 docker {
@@ -84,7 +86,7 @@ pipeline {
             }
 
             environment {
-                CI_ENVIRONMENT_URL= 'STAGING_URL_TO_BE'
+                CI_ENVIRONMENT_URL = 'STAGING_URL_TO_BE'
             }
 
             steps {
@@ -123,7 +125,7 @@ pipeline {
             }
 
             environment {
-                CI_ENVIRONMENT_URL= 'https://celebrated-genie-34fe47.netlify.app'
+                CI_ENVIRONMENT_URL = 'https://celebrated-genie-34fe47.netlify.app'
             }
 
             steps {
