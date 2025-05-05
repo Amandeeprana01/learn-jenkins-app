@@ -4,4 +4,6 @@ FROM mcr.microsoft.com/playwright:v1.52.0-jammy
 WORKDIR /app
 
 # Ensure clean environment and install packages one by one
-RUN npm install netlify-cli && npm install node-jq
+RUN npm install -g netlify-cli && npm install node-jq serve
+
+
