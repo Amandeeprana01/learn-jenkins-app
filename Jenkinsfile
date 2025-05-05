@@ -6,13 +6,6 @@ pipeline {
         NETLIFY_AUTH_TOKEN = credentials('netlify-tocken')
         CI_ENVIRONMENT_URL= 'https://celebrated-genie-34fe47.netlify.app/'
     }
-
-    stages {
-        stage('Docker') {
-            steps {
-                sh 'docker build -t my-playwright .'
-            }
-        }
         stage('Build') {
             agent {
                 docker {
