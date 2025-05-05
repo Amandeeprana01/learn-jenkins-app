@@ -23,7 +23,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'my-aws-key', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                   sh '''
                     aws --version
-                    echo "HELLO THIS IS S# FILE" > test.txt
+                    echo "HELLO THIS IS s3 FILE" > test.txt
                     aws s3 cp test.txt s3://$AWS_S3_BUCKET/test.txt
                     '''
             }
