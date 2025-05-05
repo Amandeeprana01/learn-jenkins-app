@@ -16,6 +16,9 @@ pipeline {
                     reuseNode true
                 }
             }
+            environment {
+                 REACT_APP_VERSION = '1.2.3'  // ✅ Moved here
+             }
             steps {
                 sh '''
                 ls -la
