@@ -5,9 +5,29 @@ pipeline {
         NETLIFY_SITE_ID = '8686a009-5883-4cea-bb3d-243c44bcd1fa'
         NETLIFY_AUTH_TOKEN = credentials('netlify-tocken')
         CI_ENVIRONMENT_URL = 'https://celebrated-genie-34fe47.netlify.app/'
+        AWS_DEFAULT_REGION= "us-east-1"
     }
 
     stages {
+            stage('Deploy to AWS'){
+                 agent {
+                    docker {
+                        image 'amazon/aws-cli'
+                        reuseNode true
+                        args "--entrypoint=''"
+                    
+                     }
+            }
+            
+                
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'my-aws-key', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                  sh '''
+                    aws --version
+                    aws ecs register-task-defination --cli-input-json file://learn-jenkins-app/AWS/task-defination-prod.json
+                    '''
+             }
 
         stage('Build') {
             agent {
@@ -26,156 +46,8 @@ pipeline {
                 npm run build
                 ls -la
                 '''
-            }
-        }
-            stage('AWS'){
-                 agent {
-                    docker {
-                        image 'amazon/aws-cli'
-                        reuseNode true
-                        args "--entrypoint=''"
-                    
-                     }
-            }
-            environment {
-                AWS_S3_BUCKET= 'appsyboy'
-            }
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'my-aws-key', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-                  sh '''
-                    aws --version
-                    aws s3 sync build s3://$AWS_S3_BUCKET
-                    '''
-            }
-                
-            }
-        }
-
-        stage('Run Tests') {
-            parallel {
-                stage('Test') {
-                    agent {
-                        docker {
-                            image 'node:18-alpine'
-                            reuseNode true
-                        }
-                    }
-                    steps {
-                        sh '''
-                        test -f build/index.html
-                        npm test
-                        '''
-                    }
-                }
-
-                stage('E2E') {
-                    agent {
-                        docker {
-                            image 'my-playwright'
-                            reuseNode true
-                        }
-                    }
-                    steps {
-                        sh '''
-                        serve -s build &
-                        sleep 10
-                        npx playwright test --reporter=html --output=playwright-report
-                        '''
-                    }
-                    post {
-                        always {
-                            publishHTML([
-                                allowMissing: false,
-                                alwaysLinkToLastBuild: false,
-                                keepAll: false,
-                                reportDir: 'playwright-report',
-                                reportFiles: 'index.html',
-                                reportName: 'Playwright Local',
-                                reportTitles: '',
-                                useWrapperFileDirectly: true
-                            ])
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Deploy staging') {
-            agent {
-                docker {
-                    image 'my-playwright'
-                    reuseNode true
-                }
-            }
-
-            environment {
-                CI_ENVIRONMENT_URL = 'STAGING_URL_TO_BE'
-            }
-
-            steps {
-                sh '''
-                netlify --version
-                echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
-                netlify status
-                netlify deploy --dir=build --json > deploy-output.json
-                CI_ENVIRONMENT_URL=$(jq -r '.deploy_url' deploy-output.json)
-                npx playwright test --reporter=html --output=playwright-report
-                '''
-            }
-
-            post {
-                always {
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: false,
-                        keepAll: false,
-                        reportDir: 'playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Staging E2E',
-                        reportTitles: '',
-                        useWrapperFileDirectly: true
-                    ])
-                }
-            }
-        }
-
-        stage('Deploy prod') {
-            agent {
-                docker {
-                    image 'my-playwright'
-                    reuseNode true
-                }
-            }
-
-            environment {
-                CI_ENVIRONMENT_URL = 'https://celebrated-genie-34fe47.netlify.app'
-            }
-
-            steps {
-                sh '''
-                node --version
-                netlify --version
-                echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-                netlify status
-                netlify deploy --dir=build --prod
-                npx playwright test --reporter=html --output=playwright-report
-                '''
-            }
-
-            post {
-                always {
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: false,
-                        keepAll: false,
-                        reportDir: 'playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Production E2E',
-                        reportTitles: '',
-                        useWrapperFileDirectly: true
-                    ])
+                    }             
                 }
             }
         }
     }
-}
